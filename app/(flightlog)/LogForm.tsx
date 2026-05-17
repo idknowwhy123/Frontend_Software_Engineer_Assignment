@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import React from "react";
 
 const emptyForm = {
   passengerName: "",
@@ -6,9 +7,14 @@ const emptyForm = {
   timestamp: "",
 };
 
-function LogForm(props) {
-  const { type, onSubmit } = props;
+type LogFormProps = {
+  style?: React.CSSProperties
+  data: any[]
+  type: "departure" | "arrival"
+  onSubmit: (log: any) => void
+}
 
+function LogForm({ type, onSubmit }: LogFormProps) {
   const [formData, setFormData] = useState(emptyForm);
 
   const handleSubmit = useCallback(() => {
@@ -16,10 +22,11 @@ function LogForm(props) {
     setFormData(emptyForm);
   }, [formData, type, onSubmit]);
 
-  const handleChange = useCallback(({ target }) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement> ) => {
+    const { id, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [target.id]: target.value,
+      [id]: value,
     }));
   }, []);
 
@@ -28,13 +35,13 @@ function LogForm(props) {
       <div
         style={{ flex: 1, display: "flex", flexDirection: "column", rowGap: 4 }}
       >
-        <label htmlFor="pname" style={{ fontWeight: "bold" }}>
+        <label htmlFor="passengerName" style={{ fontWeight: "bold" }}>
           Passenger Name:
         </label>
         <input
           type="text"
-          id="pname"
-          name="pname"
+          id="passengerName"
+          name="passengerName"
           value={formData.passengerName}
           onChange={handleChange}
         />

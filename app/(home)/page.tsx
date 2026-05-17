@@ -12,6 +12,7 @@ const flightLogService = new FlightLogService();
 
 export default function Home() {
   const [logs, setLogs] = useState([]);
+  const [log, setLog] = useState([]);
 
   const handleAddLog = useCallback(
     (log) => {
