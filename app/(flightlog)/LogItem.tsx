@@ -1,5 +1,4 @@
-function LogItem(props) {
-  const { item } = props;
+function LogItem({ item }: { item: Log }) {
   return (
     <div style={{ display: "flex" }}>
       <span style={{ flex: 1 }}>{item.passengerName}</span>

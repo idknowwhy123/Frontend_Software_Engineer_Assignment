@@ -7,13 +7,6 @@ const emptyForm = {
   timestamp: "",
 };
 
-type LogFormProps = {
-  style?: React.CSSProperties
-  data: any[]
-  type: "departure" | "arrival"
-  onSubmit: (log: any) => void
-}
-
 function LogForm({ type, onSubmit }: LogFormProps) {
   const [formData, setFormData] = useState(emptyForm);
 

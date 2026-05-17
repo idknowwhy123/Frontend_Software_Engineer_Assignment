@@ -1,5 +1,5 @@
 export class FlightLogService {
-  initialData = [
+  initialData : Log[] = [
     {
       passengerName: "cherprang",
       airport: "bangkok",
@@ -23,7 +23,7 @@ export class FlightLogService {
   getLogs() {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(this.initialData || []);
+      resolve(this.initialData);
     }, 2000);
   });
 }
