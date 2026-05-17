@@ -1,62 +1,53 @@
 "use client";
 
-import { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./Home.module.css";
-import { FlightLogService } from "../(flightlog)/fightlog.service";
+import { FlightLogService } from "../(flightlog)/flightlog.service";
 import LogCard from "../(flightlog)/LogCard";
 import LogForm from "../(flightlog)/LogForm";
 // import BoardingPassCard from "../(boardingpass)/BoardingPassCard";
 
 const flightLogService = new FlightLogService();
 
-type Log = {
-  passengerName: string;
-  airport: string;
-  timestamp: number;
-  type: "departure" | "arrival";
-};
-
 export default function Home() {
   const [logs, setLogs] = useState<Log[]>([]);
+  const [depMap, setDepMap] = useState<Map<string, { airport: string; timestamp: number }>>(new Map());
+  const [avgMap, setAvgMap] = useState<Map<string, { totalTime: number; counts: number }>>(new Map());
 
   const handlePrintAvgTime = useCallback(() => {
-    const depMap = new Map<string, { airport: string; timestamp: number }>();
-    const routeDurations: Record<string, number[]> = {};
+    avgMap.forEach((value, route) => {
+      console.log(`${route} : ${formatDuration(value.totalTime / value.counts)}`);
+    });
+  }, [avgMap]);
 
-    for (const log of logs) {
-      if (log.type === "departure") {
-        depMap.set(log.passengerName, {
-          airport: log.airport,
-          timestamp: log.timestamp,
+  const handleAddLog = useCallback((log: Log) => {
+    setLogs((prev) => [...prev, log]);
+    if (log.type === "departure") {
+      depMap.set(log.passengerName, { airport: log.airport, timestamp: log.timestamp });
+      setDepMap(new Map(depMap));
+    } else if (log.type === "arrival") {
+      const dep = depMap.get(log.passengerName);
+      if (dep) {
+        const route = `${dep.airport} to ${log.airport}`;
+        const existing = avgMap.get(route);
+        avgMap.set(route, {
+          totalTime: (existing?.totalTime ?? 0) + (log.timestamp - dep.timestamp),
+          counts: (existing?.counts ?? 0) + 1,
         });
-      } else {
-        const dep = depMap.get(log.passengerName);
-        if (!dep) continue;
-        const key = `${dep.airport}->${log.airport}`;
-        (routeDurations[key] ??= []).push(log.timestamp - dep.timestamp);
+        setAvgMap(new Map(avgMap));
       }
     }
-
-    for (const [route, durations] of Object.entries(routeDurations)) {
-      const avg = durations.reduce((a, b) => a + b, 0) / durations.length;
-      console.log(`${route}: ${Math.round(avg)}s avg`);
-    }
-  }, [logs]);
-
-  const handleAddLog = useCallback(
-    (log: Log) => {
-      setLogs(logs => [...logs, log]);
-    },
-    [logs]
-  );
+  }, [depMap, avgMap]);
 
   useEffect(() => {
     const fetch = async () => {
       const data = await flightLogService.getLogs();
-      setLogs(data);
+      setLogs(data as Log[]);
+      const { depMap, avgMap } = calculateMaps(data as Log[]);
+      setDepMap(depMap);
+      setAvgMap(avgMap);
     };
-
     fetch();
   }, []);
 
@@ -72,13 +63,11 @@ export default function Home() {
         </p>
         <div className={styles.card} style={{ margin: 16, width: "100%" }}>
           <h2>Flight Logs</h2>
-          <LogCard style={{ width: "100%" }} data={logs}></LogCard>
+          <LogCard data={logs}></LogCard>
         </div>
         <div className={styles.card} style={{ margin: 16, width: "100%" }}>
           <h2>Departure Logging</h2>
           <LogForm
-            style={{ width: "100%" }}
-            data={logs}
             type={"departure"}
             onSubmit={handleAddLog}
           ></LogForm>
@@ -86,14 +75,14 @@ export default function Home() {
         <div className={styles.card} style={{ margin: 16, width: "100%" }}>
           <h2>Arrival Logging</h2>
           <LogForm
-            style={{ width: "100%" }}
-            data={logs}
             type={"arrival"}
             onSubmit={handleAddLog}
           ></LogForm>
         </div>
         <div>
-          <button onClick={handlePrintAvgTime}>Print avg time to console</button>
+          <button onClick={handlePrintAvgTime}>
+            Print avg time to console
+          </button>
         </div>
         {/* Render boarding pass here */}
         {/* {[].map((_, i) => ( */}
@@ -115,4 +104,32 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+function calculateMaps(data: Log[]) {
+    const newDepMap = new Map<string, { airport: string; timestamp: number }>()
+    const newAvgMap = new Map<string, { totalTime: number; counts: number }>()
+    data.forEach((log) => {
+      if (log.type === "departure") {
+        newDepMap.set(log.passengerName, { airport: log.airport, timestamp: log.timestamp })
+      } else if (log.type === "arrival") {
+        const dep = newDepMap.get(log.passengerName)
+        if (dep) {
+          const route = `${dep.airport} to ${log.airport}`
+          const travelTime = log.timestamp - dep.timestamp
+          const existing = newAvgMap.get(route)
+          newAvgMap.set(route, {
+            totalTime: (existing?.totalTime ?? 0) + travelTime,
+            counts: (existing?.counts ?? 0) + 1,
+          })
+        }
+      }
+    })
+    return { depMap: newDepMap, avgMap: newAvgMap }
+  }
+
+  function formatDuration(sec: number): string {
+  if (sec < 60) return `${sec.toFixed(1)} sec`;
+  if (sec < 3_600) return `${(sec / 60).toFixed(1)} min`;
+  return `${(sec / 3_600).toFixed(1)} hr`;
 }
