@@ -18,7 +18,7 @@ function LogForm({ type, onSubmit }: LogFormProps) {
   const [formData, setFormData] = useState(emptyForm);
 
   const handleSubmit = useCallback(() => {
-    onSubmit({ ...formData, type });
+    onSubmit({ ...formData, type, timestamp: new Date(formData.timestamp).getTime() / 1000, });
     setFormData(emptyForm);
   }, [formData, type, onSubmit]);
 

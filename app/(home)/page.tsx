@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import styles from "./Home.module.css";
 import { FlightLogService } from "../(flightlog)/fightlog.service";
@@ -13,12 +13,36 @@ const flightLogService = new FlightLogService();
 type Log = {
   passengerName: string;
   airport: string;
-  timestamp: string;
+  timestamp: number;
   type: "departure" | "arrival";
 };
 
 export default function Home() {
   const [logs, setLogs] = useState<Log[]>([]);
+
+  const handlePrintAvgTime = useCallback(() => {
+    const depMap = new Map<string, { airport: string; timestamp: number }>();
+    const routeDurations: Record<string, number[]> = {};
+
+    for (const log of logs) {
+      if (log.type === "departure") {
+        depMap.set(log.passengerName, {
+          airport: log.airport,
+          timestamp: log.timestamp,
+        });
+      } else {
+        const dep = depMap.get(log.passengerName);
+        if (!dep) continue;
+        const key = `${dep.airport}->${log.airport}`;
+        (routeDurations[key] ??= []).push(log.timestamp - dep.timestamp);
+      }
+    }
+
+    for (const [route, durations] of Object.entries(routeDurations)) {
+      const avg = durations.reduce((a, b) => a + b, 0) / durations.length;
+      console.log(`${route}: ${Math.round(avg)}s avg`);
+    }
+  }, [logs]);
 
   const handleAddLog = useCallback(
     (log: Log) => {
@@ -67,6 +91,9 @@ export default function Home() {
             type={"arrival"}
             onSubmit={handleAddLog}
           ></LogForm>
+        </div>
+        <div>
+          <button onClick={handlePrintAvgTime}>Print avg time to console</button>
         </div>
         {/* Render boarding pass here */}
         {/* {[].map((_, i) => ( */}
