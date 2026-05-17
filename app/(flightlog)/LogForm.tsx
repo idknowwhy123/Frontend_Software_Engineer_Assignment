@@ -67,7 +67,7 @@ function LogForm({ type, onSubmit }: LogFormProps) {
           Timestamp:
         </label>
         <input
-          type="text"
+          type="datetime-local"
           id="timestamp"
           name="timestamp"
           value={formData.timestamp}

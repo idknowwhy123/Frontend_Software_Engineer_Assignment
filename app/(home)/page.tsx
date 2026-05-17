@@ -10,14 +10,19 @@ import LogForm from "../(flightlog)/LogForm";
 
 const flightLogService = new FlightLogService();
 
+type Log = {
+  passengerName: string;
+  airport: string;
+  timestamp: string;
+  type: "departure" | "arrival";
+};
+
 export default function Home() {
-  const [logs, setLogs] = useState([]);
-  const [log, setLog] = useState([]);
+  const [logs, setLogs] = useState<Log[]>([]);
 
   const handleAddLog = useCallback(
-    (log) => {
-      logs.push(log);
-      setLogs(logs);
+    (log: Log) => {
+      setLogs(logs => [...logs, log]);
     },
     [logs]
   );
