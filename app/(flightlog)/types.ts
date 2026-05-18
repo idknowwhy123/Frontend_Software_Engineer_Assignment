@@ -6,6 +6,14 @@ type Log = {
 };
 
 type LogFormProps = {
-  type: "departure" | "arrival"
-  onSubmit: (log: Log) => void
+  type: "departure" | "arrival";
+  pendingPassengers?: string[];
+  minTimeStamp?: number;
+  onSubmit: (log: Log) => void;
 }
+
+type FormErrors = {
+  passengerName?: string;
+  airport?: string;
+  timestamp?: string;
+};

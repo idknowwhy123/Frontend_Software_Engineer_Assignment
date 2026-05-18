@@ -21,10 +21,6 @@ export class FlightLogService {
   ];
 
   getLogs() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(this.initialData);
-    }, 2000);
-  });
-}
+    return Promise.resolve(this.initialData);
+  }
 }
