@@ -1,34 +1,78 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Next Airline Flight Log
+
+Frontend screening assignment built with Next.js and Tailwind CSS.
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+npm run dev
+npm run lint
+npm run build
+```
 
-## Learn More
+## Extra Work Selected
 
-To learn more about Next.js, take a look at the following resources:
+### Optimize Average Lookup To O(1)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Implemented an average-time map keyed by route, for example:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```text
+bangkok to tokyo
+```
 
-## Deploy on Vercel
+The app keeps accumulated `totalTime` and `counts` per route, so printing each route average can read directly from the map instead of recalculating every passenger log from scratch.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Refactor Code And Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Refactored repeated UI into reusable components:
+
+- `Button`
+- `Card`
+- `Badge`
+- `EmptyState`
+- `DarkModeToggle`
+
+Reason: the original UI used inline styles and repeated layout patterns. Shared components make the code easier to maintain and keep states such as hover, focus, active, and disabled consistent.
+
+## Challenge Work Selected
+
+### Refactoring With Reasoning
+
+I refactored the home page from a starter Next.js page into a focused flight-log dashboard.
+
+Main decisions:
+
+- Use a dashboard layout because the app is an operational tool, not a landing page.
+- Use summary cards for total logs, pending arrivals, and tracked routes so users can quickly understand the current state.
+- Use semantic HTML such as `header`, `main`, `section`, `footer`, `table`, and `fieldset` to improve accessibility.
+- Use a real table for flight logs because passenger, airport, timestamp, and type are tabular data.
+
+### CSS And Visual Design
+
+I used Tailwind CSS for styling.
+
+Improvements:
+
+- Responsive layout for mobile and desktop.
+- Clear typography hierarchy.
+- Consistent spacing and card surfaces.
+- Styled form controls with focus and error states.
+- Dark mode support.
+- Empty state for the log table.
+- Status badges for departure and arrival logs.
